@@ -1,16 +1,14 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2",
-	"Notes_project/Functions_Notes/functions/"
+	"notes_project/routes"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
 	app := fiber.New()
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("hi")
-	})
-
+	routes.RegisterNoteRoutes(app)
 	app.Listen(":3000")
+
 }

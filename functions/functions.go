@@ -1,7 +1,6 @@
 package functions
 
 import (
-	"bufio"
 	"encoding/csv"
 	"fmt"
 	"log"
@@ -17,14 +16,9 @@ type Note struct {
 	CreateAt time.Time
 }
 
-func Create(note *Note) {
-	fmt.Println("Название заметки: ")
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	note.Title = scanner.Text()
-	fmt.Println("Заметка: ")
-	scanner.Scan()
-	note.Text = scanner.Text()
+func Create(note *Note, title, text string) {
+	note.Title = title
+	note.Text = text
 	note.CreateAt = time.Now()
 
 }
@@ -176,20 +170,13 @@ func UpdateNote(note *Note) error {
 	return nil
 }
 
-func ReadNote() {
+func ReadNote() ([][]string, error) {
 	file, err := os.Open("notes.csv")
 	if err != nil {
-		log.Fatalf("Reading error: %v ", err)
+		return nil, err
 	}
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-
-	dataNote, err := reader.ReadAll()
-	if err != nil {
-		log.Fatalf("Error: %v ", err)
-	}
-	for _, dataNotes := range dataNote {
-		fmt.Println(dataNotes)
-	}
+	return reader.ReadAll()
 }
