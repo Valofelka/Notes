@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"notes_project/routes"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,6 +10,6 @@ import (
 func main() {
 	app := fiber.New()
 	routes.RegisterNoteRoutes(app)
-	app.Listen(":3000")
+	log.Fatal(app.Listen(":3000"))
 
 }

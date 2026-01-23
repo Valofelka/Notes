@@ -180,3 +180,39 @@ func ReadNote() ([][]string, error) {
 	reader := csv.NewReader(file)
 	return reader.ReadAll()
 }
+
+func ReadNoteId(id int) (*Note, error) {
+	file, err := os.Open("notes.csv")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for i, record := range records {
+		if i == 0 {
+			continue
+		}
+		recordId, err := strconv.Atoi(record[0])
+		if err != nil {
+			continue
+		}
+
+		if recordId == id {
+			createdAt, _ := time.Parse(time.RFC1123Z, record[3])
+
+			return &Note{
+				Id:       recordId,
+				Title:    record[1],
+				Text:     record[2],
+				CreateAt: createdAt,
+			}, nil
+		}
+	}
+	return nil, fmt.Errorf("Not found id")
+}
