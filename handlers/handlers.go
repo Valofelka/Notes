@@ -1,35 +1,34 @@
 package handlers
 
 import (
-	"notes_project/functions"
+	"notes_project/models"
+	"notes_project/services"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type CreateNoteRequest struct {
-	Title string `json:"title"`
-	Text  string `json:"text"`
+type NoteHandler struct {
+	service *services.NoteService
 }
 
-type UpdateNoteRequest struct {
-	Title string `json:"title"`
-	Text  string `json:"text"`
+func NewNoteHandler(service *services.NoteService) *NoteHandler {
+	return &NoteHandler{}
 }
 
 // Обработчики HTTP-запросов
 func CreateNote(c *fiber.Ctx) error { //c *fiber.Ctx - контекст запроса
-	var req CreateNoteRequest
+	var req models.CreateNoteRequest
 
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest). //HTTP- статус ответа
 								JSON(fiber.Map{"error": "invalid request body"})
 	}
 
-	note := &functions.Note{}
-	functions.Create(note, req.Title, req.Text)
+	note := &models.Note{}
+	services.Create(note, req.Title, req.Text)
 
-	if err := functions.AddNote(note); err != nil {
+	if err := services.AddNote(note); err != nil {
 		return c.Status(fiber.StatusInternalServerError).
 			JSON(fiber.Map{"error": err.Error()})
 	}
@@ -38,7 +37,7 @@ func CreateNote(c *fiber.Ctx) error { //c *fiber.Ctx - контекст запр
 }
 
 func GetNotes(c *fiber.Ctx) error {
-	notes, err := functions.ReadNote()
+	notes, err := services.ReadNote()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).
 			JSON(fiber.Map{"error": err.Error()})
@@ -54,7 +53,7 @@ func GetNoteID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{"error": "invalid id"})
 	}
-	note, err := functions.ReadNoteId(id)
+	note, err := services.ReadNoteId(id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).
 			JSON(fiber.Map{"error": err.Error()})
@@ -71,7 +70,7 @@ func UpdateNote(c *fiber.Ctx) error {
 			JSON(fiber.Map{"error": "invalid note id"})
 	}
 
-	var req UpdateNoteRequest
+	var req models.UpdateNoteRequest
 
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).
@@ -79,13 +78,13 @@ func UpdateNote(c *fiber.Ctx) error {
 
 	}
 
-	note := &functions.Note{
+	note := &models.Note{
 		Id:    id,
 		Title: req.Title,
 		Text:  req.Text,
 	}
 
-	if err := functions.UpdateNote(note); err != nil {
+	if err := services.UpdateNote(note); err != nil {
 		return c.Status(fiber.StatusInternalServerError).
 			JSON(fiber.Map{"error": err.Error()})
 	}
@@ -101,9 +100,9 @@ func DeleteNote(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{"error": "invalid id"})
 	}
-	note := &functions.Note{Id: id}
+	note := &models.Note{Id: id}
 
-	if err := functions.DeleteNote(note); err != nil {
+	if err := services.DeleteNote(note); err != nil {
 		return c.Status(fiber.StatusNotFound).
 			JSON(fiber.Map{"error": err.Error()})
 	}
