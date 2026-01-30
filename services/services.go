@@ -3,11 +3,12 @@ package services
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/gocarina/gocsv"
 	"notes_project/models"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/gocarina/gocsv"
 )
 
 type NoteService struct {
@@ -24,7 +25,7 @@ func NewNoteService(filePath string) (*NoteService, error) {
 	return service, nil
 }
 
-func (s *NoteService) Create(title, text string) *models.Note {
+func (s *NoteService) CreateNote(title, text string) *models.Note {
 	return &models.Note{
 		Title:     title,
 		Text:      text,
