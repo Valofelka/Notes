@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"notes_project/models"
 	"notes_project/services"
 	"strconv"
 
@@ -15,6 +14,11 @@ type NoteHandler struct {
 type CreateNoteRequest struct {
 	Title string `json: "title"`
 	Text  string `json: "text"`
+}
+
+type UpdateNoteRequest struct {
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
 
 func NewNoteHandler(service *services.NoteService) *NoteHandler {
@@ -72,7 +76,7 @@ func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
 			JSON(fiber.Map{"error": "invalid note id"})
 	}
 
-	var req models.UpdateNoteRequest
+	var req UpdateNoteRequest
 
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).
@@ -80,14 +84,10 @@ func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
 
 	}
 
-	note := &models.Note{
-		Id:    id,
-		Title: req.Title,
-		Text:  req.Text,
-	}
+	note, err := h.service.UpdateNote(id, req.Title, req.Text)
 
-	if err := h.service.UpdateNote(note); err != nil {
-		return c.Status(fiber.StatusInternalServerError).
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).
 			JSON(fiber.Map{"error": err.Error()})
 	}
 

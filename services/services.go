@@ -124,46 +124,70 @@ func (s *NoteService) DeleteNote(id int) error {
 
 }
 
-func (s *NoteService) UpdateNote(note *models.Note) error {
+func (s *NoteService) UpdateNote(id int, title, text string) (*models.Note, error) {
 	file, err := os.Open(s.filePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-
 	records, err := reader.ReadAll()
-	var newRecords [][]string
-	var _ bool
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		newRecords [][]string
+		updated    bool
+		updateNote *models.Note
+	)
 
 	for i, record := range records {
 		if i == 0 {
 			newRecords = append(newRecords, record)
 			continue
 		}
-		if record[0] == strconv.Itoa(note.Id) {
-			record[1] = note.Title
-			record[2] = note.Text
-			_ = true
+		recordID, err := strconv.Atoi(record[0])
+		if err != nil {
+			return nil, err
+		}
+		if recordID == id {
+			record[1] = title
+			record[2] = text
+			updated = true
+
+			createdAt, _ := time.Parse(time.RFC1123Z, record[3])
+
+			updateNote = &models.Note{
+				Id:        id,
+				Title:     title,
+				Text:      text,
+				CreatedAt: createdAt,
+			}
 		}
 		newRecords = append(newRecords, record)
+
+	}
+
+	if !updated {
+		return nil, fmt.Errorf("note with id %d not found", id)
 	}
 
 	newFile, err := os.Create(s.filePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer newFile.Close()
 
 	writer := csv.NewWriter(newFile)
-	err = writer.WriteAll(newRecords)
-	if err != nil {
-		return err
-	}
 	defer writer.Flush()
 
-	return nil
+	if err := writer.WriteAll(newRecords); err != nil {
+		return nil, err
+	}
+
+	return updateNote, nil
 }
 
 func (s *NoteService) GetAllNotes() ([]*models.Note, error) {

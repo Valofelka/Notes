@@ -8,8 +8,3 @@ type Note struct {
 	Title     string    `json:"title" csv:"title"`
 	CreatedAt time.Time `json:"createdAt" csv:"createdAt"`
 }
-
-type UpdateNoteRequest struct {
-	Title string `json:"title"`
-	Text  string `json:"text"`
-}
