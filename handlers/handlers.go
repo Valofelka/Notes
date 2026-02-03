@@ -12,8 +12,8 @@ type NoteHandler struct {
 }
 
 type CreateNoteRequest struct {
-	Title string `json: "title"`
-	Text  string `json: "text"`
+	Title string `json: "title" example:"Заголовок"`
+	Text  string `json: "text" example:"Текст заметки"`
 }
 
 type UpdateNoteRequest struct {
@@ -21,6 +21,16 @@ type UpdateNoteRequest struct {
 	Text  string `json:"text"`
 }
 
+// CreateNote godoc
+// @Summary Создать заметку
+// @Description Создает новую заметку
+// @Tags notes
+// @Accept json
+// @Produce json
+// @Param note body models.CreateNoteRequest true "Данные заметки"
+// @Success 200 {object} models.Note
+// @Failure 400 {object} map[string]string
+// @Router /notes [post]
 func NewNoteHandler(service *services.NoteService) *NoteHandler {
 	return &NoteHandler{service: service}
 }

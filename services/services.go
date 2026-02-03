@@ -16,13 +16,9 @@ type NoteService struct {
 	lastId   int
 }
 
-func NewNoteService(filePath string) (*NoteService, error) {
-	service := &NoteService{filePath: filePath}
+func NewNoteService(filePath string) *NoteService {
+	return &NoteService{filePath: filePath}
 
-	if err := service.LastID(); err != nil {
-		return nil, err
-	}
-	return service, nil
 }
 
 func (s *NoteService) CreateNote(title, text string) *models.Note {

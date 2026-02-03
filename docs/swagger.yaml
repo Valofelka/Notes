@@ -1,0 +1,9 @@
+basePath: /api/v1
+host: localhost:3000
+info:
+  contact: {}
+  description: API для работы с заметками
+  title: Notes API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
