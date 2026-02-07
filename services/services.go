@@ -65,19 +65,24 @@ func (s *NoteService) LastID() error {
 
 }
 
-func (s *NoteService) nextID() int {
-	s.lastId++
-	return s.lastId
+func (s *NoteService) nextID(notes []models.Note) int {
+	maxID := 0
+	for _, note := range notes {
+		if note.Id > maxID {
+			maxID = note.Id
+		}
+	}
+	return maxID + 1
 }
 
 func (s *NoteService) AddNote(note *models.Note) error {
 	notes, err := s.GetAllNotes()
-	if err != nil && !os.IsNotExist(err) {
-		return err
+	if err != nil {
+		notes = []models.Note{}
 	}
 
-	note.Id = s.nextID()
-	notes = append(notes, note)
+	note.Id = s.nextID(notes)
+	notes = append(notes, *note)
 
 	file, err := os.Create(s.filePath)
 	if err != nil {
@@ -102,7 +107,7 @@ func (s *NoteService) DeleteNote(id int) error {
 			found = true
 			continue
 		}
-		result = append(result, note)
+		result = append(result, &note)
 
 	}
 	if !found {
@@ -186,17 +191,18 @@ func (s *NoteService) UpdateNote(id int, title, text string) (*models.Note, erro
 	return updateNote, nil
 }
 
-func (s *NoteService) GetAllNotes() ([]*models.Note, error) {
+func (s *NoteService) GetAllNotes() ([]models.Note, error) {
 	file, err := os.Open(s.filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var notes []*models.Note
+	var notes []models.Note
 	if err := gocsv.UnmarshalFile(file, &notes); err != nil {
 		return nil, err
 	}
+
 	return notes, nil
 }
 
@@ -208,10 +214,10 @@ func (s *NoteService) GetNoteByID(id int) (*models.Note, error) {
 
 	for _, note := range notes {
 		if note.Id == id {
-			return note, nil
+			return &note, nil
 		}
 	}
 	return nil, fmt.Errorf("not found id")
 }
 
-// test
+//test

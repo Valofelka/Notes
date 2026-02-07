@@ -12,7 +12,7 @@ import (
 	"notes_project/routes"
 	"notes_project/services"
 
-	fiberSwagger "github.com/gofiber/swagger/v2"
+	fiberSwagger "github.com/gofiber/swagger"
 
 	"github.com/gofiber/fiber/v2"
 
