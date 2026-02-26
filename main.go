@@ -11,6 +11,7 @@ import (
 	"notes_project/handlers"
 	"notes_project/routes"
 	"notes_project/services"
+	"notes_project/services/store"
 
 	fiberSwagger "github.com/gofiber/swagger"
 
@@ -21,8 +22,9 @@ import (
 
 func main() {
 	app := fiber.New()
+	storage := store.NewCSVStore("notes.csv")
 
-	noteService := services.NewNoteService("notes.csv")
+	noteService := services.NewNoteService(storage)
 
 	noteHandler := handlers.NewNoteHandler(noteService)
 

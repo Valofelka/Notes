@@ -1,9 +1,65 @@
 basePath: /api/v1
+definitions:
+  handlers.CreateNoteRequest:
+    properties:
+      text:
+        example: Текст заметки
+        type: string
+      title:
+        example: Заголовок
+        type: string
+    type: object
+  models.Note:
+    properties:
+      createdAt:
+        type: string
+      id:
+        example: 1
+        type: integer
+      text:
+        type: string
+      title:
+        type: string
+    type: object
 host: localhost:3000
 info:
   contact: {}
   description: API для работы с заметками
   title: Notes API
   version: "1.0"
-paths: {}
+paths:
+  /notes:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую заметку
+      parameters:
+      - description: Данные заметки
+        in: body
+        name: note
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Note'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать заметку
+      tags:
+      - notes
 swagger: "2.0"

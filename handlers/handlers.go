@@ -12,13 +12,17 @@ type NoteHandler struct {
 }
 
 type CreateNoteRequest struct {
-	Title string `json: "title" example:"Заголовок"`
-	Text  string `json: "text" example:"Текст заметки"`
+	Title string `json:"title" example:"Заголовок"`
+	Text  string `json:"text" example:"Текст заметки"`
 }
 
 type UpdateNoteRequest struct {
 	Title string `json:"title"`
 	Text  string `json:"text"`
+}
+
+func NewNoteHandler(service *services.NoteService) *NoteHandler {
+	return &NoteHandler{service: service}
 }
 
 // CreateNote godoc
@@ -27,15 +31,11 @@ type UpdateNoteRequest struct {
 // @Tags notes
 // @Accept json
 // @Produce json
-// @Param note body models.CreateNoteRequest true "Данные заметки"
-// @Success 200 {object} models.Note
+// @Param note body handlers.CreateNoteRequest true "Данные заметки"
+// @Success 201 {object} models.Note
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /notes [post]
-func NewNoteHandler(service *services.NoteService) *NoteHandler {
-	return &NoteHandler{service: service}
-}
-
-// Обработчики HTTP-запросов
 func (h *NoteHandler) CreateNote(c *fiber.Ctx) error { //c *fiber.Ctx - контекст запроса
 	var req CreateNoteRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -106,14 +106,15 @@ func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
 }
 
 func (h *NoteHandler) DeleteNote(c *fiber.Ctx) error {
-
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{"error": "invalid id"})
 	}
 
-	if err := h.service.DeleteNote(id); err != nil {
+	err = h.service.DeleteNote(id)
+
+	if err != nil {
 		return c.Status(fiber.StatusNotFound).
 			JSON(fiber.Map{"error": err.Error()})
 	}
