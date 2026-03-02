@@ -53,6 +53,14 @@ func (h *NoteHandler) CreateNote(c *fiber.Ctx) error { //c *fiber.Ctx - конт
 	return c.Status(fiber.StatusCreated).JSON(note)
 }
 
+// GetAllNotes godoc
+// @Summary Вывод всех заметок
+// @Description Возвращает список все заметок
+// @Tags notes
+// @Produce json
+// @Success 200 {array} models.Note
+// @Failure 500 {object} map[string]string
+// @Router /notes [get]
 func (h *NoteHandler) GetAllNotes(c *fiber.Ctx) error {
 	notes, err := h.service.GetAllNotes()
 	if err != nil {
@@ -63,6 +71,15 @@ func (h *NoteHandler) GetAllNotes(c *fiber.Ctx) error {
 	return c.JSON(notes)
 }
 
+// GetNoteByID godoc
+// @Summary Вывод заметки
+// @Description Возвращает одну заметку
+// @Tags notes
+// @Produce json
+// @Param id path int true "ID заметки"
+// @Success 200 {array} models.Note
+// @Failure 500 {object} map[string]string
+// @Router /notes/{id} [get]
 func (h *NoteHandler) GetNoteByID(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -79,6 +96,18 @@ func (h *NoteHandler) GetNoteByID(c *fiber.Ctx) error {
 	return c.JSON(note)
 }
 
+// UpdateNote godoc
+// @Summary Обновить заметку
+// @Description Обновить заметку по ID
+// @Tags notes
+// @Accept json
+// @Produce json
+// @Param id path int true "ID заметки"
+// @Param note body handlers.CreateNoteRequest true "Данные заметки"
+// @Success 200 {object} models.Note
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /notes/{id} [put]
 func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -105,6 +134,14 @@ func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
 
 }
 
+// CreateNote godoc
+// @Summary Удалить заметку
+// @Description Удаляет заметку по id
+// @Tags notes
+// @Param id path int true "ID заметки"
+// @Success 204 "No Content"
+// @Failure 400 {object} map[string]string
+// @Router /notes/{id} [delete]
 func (h *NoteHandler) DeleteNote(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
