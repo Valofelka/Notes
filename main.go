@@ -24,9 +24,9 @@ func main() {
 	app := fiber.New()
 	storage := store.NewCSVStore("notes.csv")
 
-	noteService := services.NewNoteService(storage)
+	service := services.NewNoteService(storage)
 
-	noteHandler := handlers.NewNoteHandler(noteService)
+	noteHandler := handlers.NewNoteHandler(service)
 
 	api := app.Group("/api/v1")
 	routes.RegisterNoteRoutes(api, noteHandler)

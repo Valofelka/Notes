@@ -43,7 +43,7 @@ func (h *NoteHandler) CreateNote(c *fiber.Ctx) error { //c *fiber.Ctx - конт
 			JSON(fiber.Map{"error": "invalid request body"})
 	}
 
-	note := h.service.CreateNote(req.Title, req.Text)
+	note := h.service.NewNote(req.Title, req.Text)
 
 	if err := h.service.AddNote(note); err != nil {
 		return c.Status(fiber.StatusInternalServerError).

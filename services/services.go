@@ -1,33 +1,38 @@
 package services
 
 import (
-	"encoding/csv"
 	"fmt"
 	"notes_project/models"
-	"notes_project/services/store"
-	"os"
-	"strconv"
 	"time"
-
-	"github.com/gocarina/gocsv"
 )
 
-type NoteService struct {
-	storage *store.CSVStore
+type NoteStore interface {
+	GetAllNotes() ([]models.Note, error)
+	SaveAll(notes []models.Note) error
+	UpdateNote(id int, title, text string) (*models.Note, error)
+	DeleteNote(id int) error
 }
 
-func NewNoteService(storage *store.CSVStore) *NoteService {
+type NoteService struct {
+	storage NoteStore //шаг сделать на интерфейсе
+}
+
+func NewNoteService(storage NoteStore) *NoteService {
 	return &NoteService{storage: storage}
 
 }
 
-func (s *NoteService) CreateNote(title, text string) *models.Note {
+func (s *NoteService) NewNote(title, text string) *models.Note { // конструкторы начинаются с New +
 	return &models.Note{
 		Title:     title,
 		Text:      text,
 		CreatedAt: time.Now(),
 	}
 
+}
+
+func (s *NoteService) GetAllNotes() ([]models.Note, error) {
+	return s.storage.GetAllNotes()
 }
 
 func (s *NoteService) nextID(notes []models.Note) int {
@@ -63,52 +68,7 @@ func (s *NoteService) AddNote(note *models.Note) error {
 	note.Id = s.nextID(notes)
 	notes = append(notes, *note)
 
-	file, err := os.Create(s.storage.FilePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	return gocsv.MarshalFile(&notes, file)
-}
-
-func (s *NoteService) LastID() error {
-	file, err := os.Open(s.storage.FilePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			s.storage.LastID = 0
-			return nil
-		}
-		return err
-	}
-	defer file.Close()
-
-	reader := csv.NewReader(file)
-	records, err := reader.ReadAll()
-	if err != nil {
-		return err
-	}
-
-	maxId := 0
-	for i, record := range records {
-		if i == 0 {
-			continue
-		}
-		id, err := strconv.Atoi(record[0])
-		if err != nil {
-			return fmt.Errorf("invalid id")
-		}
-		if id > maxId {
-			maxId = id
-		}
-	}
-	s.storage.LastID = maxId
-	return nil
-
-}
-
-func (s *NoteService) GetAllNotes() ([]models.Note, error) {
-	return s.storage.GetAllNotes()
+	return s.storage.SaveAll(notes)
 }
 
 func (s *NoteService) UpdateNote(id int, title, text string) (*models.Note, error) {
@@ -143,27 +103,7 @@ func (s *NoteService) UpdateNote(id int, title, text string) (*models.Note, erro
 }
 
 func (s *NoteService) DeleteNote(id int) error {
-	notes, err := s.storage.GetAllNotes()
-	if err != nil {
-		return err
-	}
-
-	var newNotes []models.Note
-	found := false
-
-	for _, note := range notes {
-		if note.Id != id {
-			newNotes = append(newNotes, note)
-		} else {
-			found = true
-		}
-	}
-
-	if !found {
-		return fmt.Errorf("note not found")
-	}
-
-	return s.storage.SaveAll(newNotes)
+	return s.storage.DeleteNote(id)
 }
 
 //test
