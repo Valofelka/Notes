@@ -3,7 +3,7 @@ package routes
 import (
 	"notes_project/handlers"
 
-	"github.com/gofiber/fiber/v2"
+	fiber "github.com/gofiber/fiber/v3"
 )
 
 func RegisterNoteRoutes(router fiber.Router, handler *handlers.NoteHandler) {

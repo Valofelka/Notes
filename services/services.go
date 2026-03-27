@@ -105,5 +105,3 @@ func (s *NoteService) UpdateNote(id int, title, text string) (*models.Note, erro
 func (s *NoteService) DeleteNote(id int) error {
 	return s.storage.DeleteNote(id)
 }
-
-//test

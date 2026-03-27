@@ -4,7 +4,7 @@ import (
 	"notes_project/services"
 	"strconv"
 
-	"github.com/gofiber/fiber/v2"
+	fiber "github.com/gofiber/fiber/v3"
 )
 
 type NoteHandler struct {
@@ -36,9 +36,9 @@ func NewNoteHandler(service *services.NoteService) *NoteHandler {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /notes [post]
-func (h *NoteHandler) CreateNote(c *fiber.Ctx) error { //c *fiber.Ctx - контекст запроса
+func (h *NoteHandler) CreateNote(c fiber.Ctx) error { //c fiber.Ctx - контекст запроса
 	var req CreateNoteRequest
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{"error": "invalid request body"})
 	}
@@ -61,7 +61,7 @@ func (h *NoteHandler) CreateNote(c *fiber.Ctx) error { //c *fiber.Ctx - конт
 // @Success 200 {array} models.Note
 // @Failure 500 {object} map[string]string
 // @Router /notes [get]
-func (h *NoteHandler) GetAllNotes(c *fiber.Ctx) error {
+func (h *NoteHandler) GetAllNotes(c fiber.Ctx) error {
 	notes, err := h.service.GetAllNotes()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).
@@ -80,7 +80,7 @@ func (h *NoteHandler) GetAllNotes(c *fiber.Ctx) error {
 // @Success 200 {array} models.Note
 // @Failure 500 {object} map[string]string
 // @Router /notes/{id} [get]
-func (h *NoteHandler) GetNoteByID(c *fiber.Ctx) error {
+func (h *NoteHandler) GetNoteByID(c fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).
@@ -108,7 +108,7 @@ func (h *NoteHandler) GetNoteByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /notes/{id} [put]
-func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
+func (h *NoteHandler) UpdateNote(c fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).
@@ -117,7 +117,7 @@ func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
 
 	var req UpdateNoteRequest
 
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{"error": "invalid request body"})
 
@@ -142,7 +142,7 @@ func (h *NoteHandler) UpdateNote(c *fiber.Ctx) error {
 // @Success 204 "No Content"
 // @Failure 400 {object} map[string]string
 // @Router /notes/{id} [delete]
-func (h *NoteHandler) DeleteNote(c *fiber.Ctx) error {
+func (h *NoteHandler) DeleteNote(c fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).

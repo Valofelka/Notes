@@ -13,15 +13,28 @@ import (
 	"notes_project/services"
 	"notes_project/services/store"
 
-	fiberSwagger "github.com/gofiber/swagger"
+	"github.com/gofiber/contrib/v3/swaggerui"
 
-	"github.com/gofiber/fiber/v2"
+	fiber "github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 
 	_ "notes_project/docs"
 )
 
 func main() {
 	app := fiber.New()
+	app.Use(cors.New(), swaggerui.New())
+	cfg := swaggerui.Config{
+		Next:     nil,
+		BasePath: "/",
+		FilePath: "./swagger.json",
+		Path:     "docs",
+		Title:    "Fiber API documentation",
+		CacheAge: 3600, // Default to 1 hour
+	}
+	app.Use(swaggerui.New(cfg))
+	// app.Use("/docs", static.New("./docs"))
+	// app.Get("/swagger/*", adaptor.HTTPHandler(swagger.New()))
 	storage := store.NewCSVStore("notes.csv")
 
 	service := services.NewNoteService(storage)
@@ -30,8 +43,6 @@ func main() {
 
 	api := app.Group("/api/v1")
 	routes.RegisterNoteRoutes(api, noteHandler)
-
-	app.Get("/swagger/*", fiberSwagger.New())
 
 	log.Fatal(app.Listen(":3000"))
 
