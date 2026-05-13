@@ -7,15 +7,15 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"notes_project/handlers"
+	"notes_project/models"
 	"notes_project/routes"
 	"notes_project/services"
-	"notes_project/services/store"
+	store "notes_project/services/store"
 	"notes_project/services/store/config"
+	database "notes_project/services/store/database"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
 	"github.com/gofiber/contrib/v3/swaggerui"
@@ -28,17 +28,26 @@ import (
 
 func main() {
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
+
 	conf := config.New()
-	connStr := "user=" + conf.DB.User + " password=" + conf.DB.Password + " dbname=" + conf.DB.DBName + " host=" + conf.DB.Host + " sslmode=" + conf.DB.SSLMode
-	db, err := sql.Open("postgres", connStr)
+
+	db, err := database.ConnectDB(conf)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+
+	db.AutoMigrate(&models.Note{})
+
+	storage := store.NewPostgresStore(db)
+
+	// if err := db.Ping(); err != nil {
+	// 	log.Fatal("failed to connect", err)
+	// }
 
 	app := fiber.New()
 	app.Use(cors.New(), swaggerui.New())
@@ -53,7 +62,7 @@ func main() {
 	app.Use(swaggerui.New(cfg))
 	// app.Use("/docs", static.New("./docs"))
 	// app.Get("/swagger/*", adaptor.HTTPHandler(swagger.New()))
-	storage := store.NewCSVStore("notes.csv")
+	// storage := store.NewCSVStore("notes.csv")
 
 	service := services.NewNoteService(storage)
 

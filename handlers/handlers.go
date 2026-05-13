@@ -87,7 +87,8 @@ func (h *NoteHandler) GetNoteByID(c fiber.Ctx) error {
 			JSON(fiber.Map{"error": "invalid id"})
 	}
 
-	note, err := h.service.GetNoteByID(id)
+	note, err := h.service.GetNoteByID(uint(id))
+
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).
 			JSON(fiber.Map{"error": err.Error()})
@@ -123,7 +124,7 @@ func (h *NoteHandler) UpdateNote(c fiber.Ctx) error {
 
 	}
 
-	note, err := h.service.UpdateNote(id, req.Title, req.Text)
+	note, err := h.service.UpdateNote(uint(id), req.Title, req.Text)
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).
@@ -149,7 +150,7 @@ func (h *NoteHandler) DeleteNote(c fiber.Ctx) error {
 			JSON(fiber.Map{"error": "invalid id"})
 	}
 
-	err = h.service.DeleteNote(id)
+	err = h.service.DeleteNote(uint(id))
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).

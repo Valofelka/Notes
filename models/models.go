@@ -1,10 +1,12 @@
 package models
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type Note struct {
-	Text      string    `json:"text" csv:"text"`
-	Id        int       `json:"id" csv:"id" example:"1"`
-	Title     string    `json:"title" csv:"title"`
-	CreatedAt time.Time `json:"createdAt" csv:"createdAt"`
+	gorm.Model
+
+	Title string `gorm:"size:30"`
+	Text  string `gorm:"size:300"`
 }

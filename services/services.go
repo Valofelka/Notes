@@ -3,14 +3,14 @@ package services
 import (
 	"fmt"
 	"notes_project/models"
-	"time"
 )
 
 type NoteStore interface {
+	CreateNote(note *models.Note) error
 	GetAllNotes() ([]models.Note, error)
-	SaveAll(notes []models.Note) error
-	UpdateNote(id int, title, text string) (*models.Note, error)
-	DeleteNote(id int) error
+	GetNoteByID(id uint) (*models.Note, error)
+	UpdateNote(note *models.Note) error
+	DeleteNote(id uint) error
 }
 
 type NoteService struct {
@@ -24,9 +24,8 @@ func NewNoteService(storage NoteStore) *NoteService {
 
 func (s *NoteService) NewNote(title, text string) *models.Note { // конструкторы начинаются с New +
 	return &models.Note{
-		Title:     title,
-		Text:      text,
-		CreatedAt: time.Now(),
+		Title: title,
+		Text:  text,
 	}
 
 }
@@ -38,21 +37,21 @@ func (s *NoteService) GetAllNotes() ([]models.Note, error) {
 func (s *NoteService) nextID(notes []models.Note) int {
 	maxID := 0
 	for _, note := range notes {
-		if note.Id > maxID {
-			maxID = note.Id
+		if int(note.ID) > maxID {
+			maxID = int(note.ID)
 		}
 	}
 	return maxID + 1
 }
 
-func (s *NoteService) GetNoteByID(id int) (*models.Note, error) {
+func (s *NoteService) GetNoteByID(id uint) (*models.Note, error) {
 	notes, err := s.storage.GetAllNotes()
 	if err != nil {
 		return nil, err
 	}
 
 	for _, note := range notes {
-		if note.Id == id {
+		if note.ID == id {
 			return &note, nil
 		}
 	}
@@ -65,43 +64,29 @@ func (s *NoteService) AddNote(note *models.Note) error {
 		notes = []models.Note{}
 	}
 
-	note.Id = s.nextID(notes)
+	note.ID = uint(s.nextID(notes))
 	notes = append(notes, *note)
 
-	return s.storage.SaveAll(notes)
+	return s.storage.CreateNote(note)
 }
 
-func (s *NoteService) UpdateNote(id int, title, text string) (*models.Note, error) {
-	notes, err := s.storage.GetAllNotes()
-
-	var updatedNote *models.Note
+func (s *NoteService) UpdateNote(id uint, title, text string) (*models.Note, error) {
+	note, err := s.storage.GetNoteByID(id)
 
 	if err != nil {
-		return updatedNote, err
+		return nil, err
 	}
-	found := false
+	note.Title = title
+	note.Text = text
 
-	for i := range notes {
-		if notes[i].Id == id {
-			notes[i].Title = title
-			notes[i].Text = text
-			updatedNote = &notes[i]
-			found = true
-			break
-		}
-	}
-	if !found {
-		return nil, fmt.Errorf("note not found")
-	}
-
-	if err := s.storage.SaveAll(notes); err != nil {
+	if err := s.storage.CreateNote(note); err != nil {
 		return nil, err
 	}
 
-	return updatedNote, nil
+	return note, nil
 
 }
 
-func (s *NoteService) DeleteNote(id int) error {
+func (s *NoteService) DeleteNote(id uint) error {
 	return s.storage.DeleteNote(id)
 }
