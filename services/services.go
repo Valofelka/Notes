@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"notes_project/models"
 )
 
@@ -34,39 +33,11 @@ func (s *NoteService) GetAllNotes() ([]models.Note, error) {
 	return s.storage.GetAllNotes()
 }
 
-func (s *NoteService) nextID(notes []models.Note) int {
-	maxID := 0
-	for _, note := range notes {
-		if int(note.ID) > maxID {
-			maxID = int(note.ID)
-		}
-	}
-	return maxID + 1
-}
-
 func (s *NoteService) GetNoteByID(id uint) (*models.Note, error) {
-	notes, err := s.storage.GetAllNotes()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, note := range notes {
-		if note.ID == id {
-			return &note, nil
-		}
-	}
-	return nil, fmt.Errorf("not found id")
+	return s.storage.GetNoteByID(id)
 }
 
 func (s *NoteService) AddNote(note *models.Note) error {
-	notes, err := s.storage.GetAllNotes()
-	if err != nil {
-		notes = []models.Note{}
-	}
-
-	note.ID = uint(s.nextID(notes))
-	notes = append(notes, *note)
-
 	return s.storage.CreateNote(note)
 }
 
@@ -79,7 +50,7 @@ func (s *NoteService) UpdateNote(id uint, title, text string) (*models.Note, err
 	note.Title = title
 	note.Text = text
 
-	if err := s.storage.CreateNote(note); err != nil {
+	if err := s.storage.UpdateNote(note); err != nil {
 		return nil, err
 	}
 

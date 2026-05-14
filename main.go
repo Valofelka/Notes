@@ -16,6 +16,7 @@ import (
 	"notes_project/services/store/config"
 	database "notes_project/services/store/database"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
 	"github.com/gofiber/contrib/v3/swaggerui"
@@ -28,10 +29,10 @@ import (
 
 func main() {
 
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	conf := config.New()
 

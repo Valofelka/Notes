@@ -35,7 +35,7 @@ func (s *PostgresStore) GetAllNotes() ([]models.Note, error) {
 }
 
 func (s *PostgresStore) UpdateNote(note *models.Note) error {
-	result := s.db.Model(note).Updates(note)
+	result := s.db.Save(note)
 
 	if result.Error != nil {
 		return result.Error
@@ -50,4 +50,16 @@ func (s *PostgresStore) DeleteNote(id uint) error {
 		return result.Error
 	}
 	return nil
+}
+
+func (s *PostgresStore) GetNoteByID(id uint) (*models.Note, error) {
+	var note models.Note
+	result := s.db.First(&note, id)
+
+	if result.Error != nil {
+		return nil, result.Error
+
+	}
+	return &note, nil
+
 }
