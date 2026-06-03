@@ -44,7 +44,8 @@ func main() {
 
 	db.AutoMigrate(&models.Note{})
 
-	storage := store.NewPostgresStore(db)
+	// storage := store.NewPostgresStore(db) //строка, которая должна меняться
+	storage := store.NewCSVStore("notes.csv")
 
 	// if err := db.Ping(); err != nil {
 	// 	log.Fatal("failed to connect", err)
